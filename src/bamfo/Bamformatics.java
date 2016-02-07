@@ -24,7 +24,7 @@ import javax.swing.UIManager;
  */
 public class Bamformatics {
 
-    final static String version = "0.2.3";
+    final static String version = "0.2.4";
 
     public static String getVersion() {
         return version;
