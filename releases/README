@@ -1,3 +1,7 @@
 Folder contains compiled "release" copies 
 
 (Contents should be match the releases marked via git)
+
+The script make-release.bash is a helper to create the zip files
+Run the script "make-release.bash 0.X.Y" to create a zip file Bamformatics-0.X.Y.zip
+ 

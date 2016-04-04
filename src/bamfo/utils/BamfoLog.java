@@ -14,7 +14,7 @@ import java.util.Date;
  */
 public class BamfoLog {
 
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    private final static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private final PrintStream logstream;
     private boolean verbose = false;
 

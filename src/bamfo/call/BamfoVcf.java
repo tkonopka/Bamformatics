@@ -28,7 +28,6 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import joptsimple.OptionParser;
@@ -68,7 +67,7 @@ public class BamfoVcf extends BamfoTool implements Runnable {
     // vcfformat will contain the ninth column for the vcf file
     // explanation for the two-letter codes are in the writeVcfHeader function
     private final static String vcfformat = "GT:GQ:ED:SF:MN:MM:MW:BW:DS:NM";
-    //String specialread = "HWI-BRUNOP16X_0001:1:4:18029:180623#0";
+    //String specialread = "readname";    
     //int speciallocus = 126370647; 
 
     private void printBamVcfHelp() {
@@ -384,7 +383,6 @@ public class BamfoVcf extends BamfoTool implements Runnable {
         //outputStream.println("snvinfo: " + snvinfo.size());
         //outputStream.println("indelinfo: " + indelinfo.size());
         //outputStream.println("indelquasicalled: " + indelquasicalled.size());
-
     }
 
     /**
@@ -409,7 +407,7 @@ public class BamfoVcf extends BamfoTool implements Runnable {
         // for indels, will need to get the anchorbase
         byte anchorbase = 'N';
 
-        if (b2r.readhasindel) {
+        if (b2r.readhasindel) {            
             // loop over the cigars  
             int nowp = b2r.startpos;
             int nowi = 0;
@@ -456,17 +454,21 @@ public class BamfoVcf extends BamfoTool implements Runnable {
 
                 // record this indel                 
                 if ((hereinsertion || heredeletion)) {
-
+                   
                     // indel anchor position is one to the left
                     indelstart--;
 
                     // find out if the anchor is really there or should be shifted to the left
-
-                    // try to evaluate the anchor using genomic sequence
+                    // try to evaluate the anchor using genomic sequence                   
                     int anchorpos = BamfoCommon.getAnchorPosition(genomereader, indelstart, indel);
                     // evaluate anchor relative to the read sequence
                     int readanchorpos = BamfoCommon.getAnchorPosition(bases, indelindex, indel);
                     int anchorpos2 = indelstart - (indelindex - readanchorpos);
+                    
+                    // avoid errors when indels are at start of chromosome
+                    anchorpos = Math.max(1, anchorpos);
+                    anchorpos2 = Math.max(1, anchorpos2);
+                    indelstart = Math.max(1, indelstart);
 
                     // use the anchor that is furthest to the left
                     byte[] anchor;
@@ -480,24 +482,24 @@ public class BamfoVcf extends BamfoTool implements Runnable {
                         //anchor[0] = genomereader.getBaseAtPositionBase1(anchorpos);
                     }
                     anchorbase = genomereader.getBaseAtPositionBase1(anchorpos);
-
+                    
                     // record this indel
                     LocusIndelDataList nowIDL = indelinfo.get(anchorpos);
                     if (nowIDL == null) {
                         nowIDL = new LocusIndelDataList(anchorpos, anchorbase);
                         indelinfo.put(anchorpos, nowIDL);
                     }
-
+                    
                     //save information about this indel into the list of indel data anchored 
                     nowIDL.add(anchor, indel, indelstart, b2r, indelindex, hereinsertion);
                 }
             }
 
         }
-
+        
         // now for each position record the information about base substitutions        
         int[] pos = b2r.pos;
-        for (int nowindex = 0; nowindex < b2r.readlength; nowindex++) {
+        for (int nowindex = 0; nowindex < b2r.readlength; nowindex++) {           
             if (pos[nowindex] > 0) {
 
                 LocusSNVDataList nowGDL = snvinfo.get(pos[nowindex]);
@@ -644,13 +646,7 @@ public class BamfoVcf extends BamfoTool implements Runnable {
         int altplus = totplus - refplus;
         int altminus = totminus - refminus;
         int alttot = altplus + altminus;
-
-        if (5 < 4 && locus.getLocusname().equals("16277852")) {
-            System.out.println("ref\t" + refplus + "\t" + refminus + "\t" + reftot);
-            System.out.println("alt\t" + altplus + "\t" + altminus + "\t" + alttot);
-            System.out.println("tot\t" + totplus + "\t" + totminus + "\t" + tottot);
-        }
-
+        
         // here again check depth threshold
         if (alttot < settings.getMindepth()) {
             return null;
@@ -972,9 +968,9 @@ public class BamfoVcf extends BamfoTool implements Runnable {
             int[] strandeddepth = indellist.getStrandedIndelCount(consensus.getIndelLen());
             indelquasicalled.put(nowpos,
                     new LocusIndelQuasiCalled(consensus,
-                    strandeddepth[0], strandeddepth[1],
-                    indellist.getNumberUniqueFromstart(consensus.getIndelLen()),
-                    indellist.getMedianMappingQuality()));
+                            strandeddepth[0], strandeddepth[1],
+                            indellist.getNumberUniqueFromstart(consensus.getIndelLen()),
+                            indellist.getMedianMappingQuality()));
         }
 
     }
@@ -1042,7 +1038,6 @@ public class BamfoVcf extends BamfoTool implements Runnable {
                 return;
             }
         }
-
 
         // start processing, open the SAM file and start computing
         SAMFileReader inputSam = new SAMFileReader(bamfile);

@@ -66,6 +66,7 @@ public class BamfoVcfDetail extends BamfoTool implements Runnable {
     private final static String[] settingtypes = {"minbasequal", "minmapqual",
         "minfromstart", "minfromend", "trim", "trimQB", "NRef", "genome", "validate"};
     private BamfoSettings settings = new BamfoSettings(settingtypes);
+    //String specialread = "readname";
 
     /**
      * reads and remembers all chromosome sequences.
@@ -690,7 +691,7 @@ public class BamfoVcfDetail extends BamfoTool implements Runnable {
             bamfolog.log(verbose, "Processing bam " + bams.get(i).getCanonicalPath());
             ok = getOneBAMInfo(i);
             if (!ok) {
-                bamfolog.log("Error during exaction in file " + bams.get(i).getCanonicalPath());
+                bamfolog.log("Error during execution in file " + bams.get(i).getCanonicalPath());
                 return false;
             }
             System.gc();
@@ -855,6 +856,11 @@ public class BamfoVcfDetail extends BamfoTool implements Runnable {
                 int readanchorpos = BamfoCommon.getAnchorPosition(bases, indelindex, indel);
                 int anchorpos2 = indelstart - (indelindex - readanchorpos);
 
+                // avoid bugs when positions fall off left edge of chromosome
+                anchorpos = Math.max(1, anchorpos);
+                anchorpos2 = Math.max(1, anchorpos2);
+                indelstart = Math.max(1, indelstart);
+
                 boolean usereadanchor = false;
                 // use the anchor that is furthest to the left
                 if (anchorpos > anchorpos2) {
@@ -935,7 +941,6 @@ public class BamfoVcfDetail extends BamfoTool implements Runnable {
 
         } // end of loop over indexes in bases/positions/qualities
 
-
         // deal with indels if there are any
         if (b2r.readhasindel) {
             byte[] thisChrSequence = chrsequences.get(record.getReferenceName());
@@ -977,9 +982,6 @@ public class BamfoVcfDetail extends BamfoTool implements Runnable {
 
             VariantSummary indelsummary = chrIndelsSummary.get(i);
 
-            //if (i == 89889431) {
-            //    System.out.println(i + "\t" + sampleindex + "\t" + (indellocus == null) + "\t" + (SNVlocus == null) + "\t" + (indelsummary == null));
-            //}
             // drain the indels first (this will look into chrIndelsInfo and chrSNVsInfo)            
             if (indelsummary != null && SNVlocus != null) {
                 // get the variant summary object
@@ -1022,13 +1024,7 @@ public class BamfoVcfDetail extends BamfoTool implements Runnable {
         // get an estimate of the coverage using the SNVlocus information
         // this will give valuable information about the coverage (low and high quality)                
         updateVIforSNVs(vI, SNVlocus, sampleindex);
-
-        // if the current sample does not have any indication of an indel, the indellocus
-        // here will be null. So skip all following steps
-        //if (indellocus==null) {
-        //indellocus = new LocusIndelDataList();
-        //}
-
+       
         // get the byte sequence of the declared indel 
         byte[] vIseq = vI.getIndel();
 

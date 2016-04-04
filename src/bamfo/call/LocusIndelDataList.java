@@ -58,6 +58,13 @@ class LocusIndelDataList {
      */
     public void add(byte[] anchor, byte[] indel, int indelstart, BamfoRecord b2r, 
             int indexonread, boolean insertion) {
+        
+        // this blog is a safeguard against potential bugs where the indexonread may go beyond
+        // the read array length (can occur if reads have unusual/wrong cigars, e.g. 30M20I20D        
+        if (indexonread>=b2r.pos.length) {
+            return;
+        }
+        
         add(anchor, indel, indelstart, b2r.mapquality, b2r.record.getReadNegativeStrandFlag(),
                 indexonread, b2r.readlength, b2r.recordname, b2r.pos[indexonread]>b2r.overlapstart, 
                 insertion);

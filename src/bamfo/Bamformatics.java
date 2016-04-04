@@ -24,7 +24,7 @@ import javax.swing.UIManager;
  */
 public class Bamformatics {
 
-    final static String version = "0.2.4";
+    final static String version = "0.2.5";
 
     public static String getVersion() {
         return version;
@@ -54,8 +54,7 @@ public class Bamformatics {
         System.out.println("Bamformatics is a suite of tools for manipulating alignment and associated files");
         System.out.println("\nAuthor: Tomasz Konopka (bamformatics@gmail.be)\n");
         System.out.println("Usage of experimental tools: java -jar Bamformatics.jar TYPE [options]\n");
-        System.out.println("   entropy            - compute alignment entropy tracks");
-        //System.out.println("   gui                - graphical user interface");
+        System.out.println("   entropy            - compute alignment entropy tracks");        
         System.out.println("   psl2bam            - create bam files from blat psl");
         System.out.println();
     }
