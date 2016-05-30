@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 Tomasz Konopka.
+ * Copyright 2012-2016 Tomasz Konopka.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import javax.swing.UIManager;
  */
 public class Bamformatics {
 
-    final static String version = "0.2.5";
+    final static String version = "0.2.6";
 
     public static String getVersion() {
         return version;
@@ -37,6 +37,7 @@ public class Bamformatics {
         System.out.println("   annotatevariants   - add ID codes to a vcf file");
         System.out.println("   callvariants       - produce variant calls");
         System.out.println("   defaults           - set default parameters");
+        System.out.println("   demultiplex        - demultiplex a bam using barcodes");
         System.out.println("   errors             - estimate substitution error rates");
         System.out.println("   filtervariants     - filter variant calls");
         System.out.println("   find               - look for indels and other properties in bam");
@@ -50,11 +51,11 @@ public class Bamformatics {
         System.out.println();
     }
 
-    public static void printExperimental() {        
+    public static void printExperimental() {
         System.out.println("Bamformatics is a suite of tools for manipulating alignment and associated files");
         System.out.println("\nAuthor: Tomasz Konopka (bamformatics@gmail.be)\n");
         System.out.println("Usage of experimental tools: java -jar Bamformatics.jar TYPE [options]\n");
-        System.out.println("   entropy            - compute alignment entropy tracks");        
+        System.out.println("   entropy            - compute alignment entropy tracks");
         System.out.println("   psl2bam            - create bam files from blat psl");
         System.out.println();
     }
@@ -77,7 +78,7 @@ public class Bamformatics {
             newargs = null;
         } else {
             newargs = new String[args.length - 1];
-            System.arraycopy(args, 1, newargs, 0, args.length-1);            
+            System.arraycopy(args, 1, newargs, 0, args.length - 1);
         }
 
         // the tooltype determine what kind of task is submitted to the executor
@@ -96,6 +97,8 @@ public class Bamformatics {
             new bamfo.stats.BamfoErrors(newargs).run();
         } else if (tooltype.equals("defaults")) {
             new bamfo.utils.BamfoDefaults(newargs).run();
+        } else if (tooltype.equals("demultiplex")) {
+            new bamfo.rebam.BamfoDemultiplex(newargs).run();
         } else if (tooltype.equals("split")) {
             new bamfo.rebam.BamfoSplit(newargs).run();
         } else if (tooltype.equals("stats")) {
@@ -127,12 +130,11 @@ public class Bamformatics {
                 java.util.logging.Logger.getLogger(Bamformatics.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             }
 
-
             //Create and display the GUI
             java.awt.EventQueue.invokeLater(new Runnable() {
                 @Override
-                public void run() {                    
-                    new bamfo.gui.BamfoGUI().setVisible(true);                    
+                public void run() {
+                    new bamfo.gui.BamfoGUI().setVisible(true);
                 }
             });
         } else {
