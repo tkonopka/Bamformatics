@@ -1,5 +1,10 @@
-/Bamformatics/nbproject/private/
-/nbproject/private/
-/nbproject/configs/
-/dist/
+#ignore temp files
+*~
+*/*~
+*/*/*~
+
+#ignore netbeans and compiled
 /build/
+/dist/
+/nbproject/
+
